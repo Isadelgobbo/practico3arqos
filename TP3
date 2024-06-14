@@ -1,0 +1,121 @@
+A.
+SINHILOS
+
+¿Qué se puede notar con respecto al tiempo de ejecución? ¿Es predecible?
+
+- Al ejecutarlos varias veces seguidas se ve que tarda mas en finalizar los procesos, en cambio si lo ejecutas en un tiempo mas espaciado suelen tener valores similares  
+  desconozco si es casualidad o realmente es una variable que  interfiere en su resultado, aun así se podria decir que no es predecible.
+CONHILOS
+
+¿Qué se puede notar con respecto al tiempo de ejecución?
+a pesar de que la diferencia no fue mucha, en procesos mas pesados el multihilos es importante, se puede apreciar tambien que dura basicamente 4 segundos que es
+la tarea de la funcion tarea_3, lo que difiere es la velocidad del procesamiento de instrucción
+
+b. compará con un compañero el tiempo de ejecución.¿son iguales?
+no son iguales, tenemos distintos tiempos, algunos parecidos pero no diria que son iguales ni nada
+c. el archivo Suma_Resta.py siempre tiene de resultado 0 y es bastante predecible, tienen tiempos parecidos. Y al descomentarlos se introduce un bucle que consume tiempo dentro de cada iteración de las funciones sumador() y restador(). Probablemente hace que las ejecuciones del script tarden más y puede afectar el valor final del acumulador debido a la condición de carrera en un entorno multithread.
+2. A.
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NUMBER_OF_THREADS 2
+#define CANTIDAD_INICIAL_HAMBURGUESAS 20
+
+int cantidad_restante_hamburguesas = CANTIDAD_INICIAL_HAMBURGUESAS;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; // Mutex para exclusión mutua
+
+void *comer_hamburguesa(void *tid) {
+    while (1) {
+        // Entrada a la región crítica (exclusión mutua)
+        pthread_mutex_lock(&mutex);
+        if (cantidad_restante_hamburguesas > 0) {
+            printf("¡Hola! Soy el hilo (comensal) %d, me voy a comer una hamburguesa, ya que todavía quedan %d.\n", (int) tid, cantidad_restante_hamburguesas);
+            cantidad_restante_hamburguesas--;
+        } else {
+            printf("¡Terminaron las hamburguesas! :(\n");
+            pthread_mutex_unlock(&mutex); // Liberar el mutex antes de salir
+            pthread_exit(NULL);
+        }
+        // Salida de la región crítica
+        pthread_mutex_unlock(&mutex);
+        // Simulación de comer una hamburguesa
+        // ...
+    }
+}
+int main() {
+    pthread_t threads[NUMBER_OF_THREADS];
+    int i;
+    for (i = 0; i < NUMBER_OF_THREADS; i++) {
+        pthread_create(&threads[i], NULL, comer_hamburguesa, (void *) i);
+    }
+    for (i = 0; i < NUMBER_OF_THREADS; i++) {
+        pthread_join(threads[i], NULL);
+    }
+    pthread_mutex_destroy(&mutex); // Destruir el mutex
+    return 0;
+}
+b. Proceso A:
+A entra a su región crítica (representa que el proceso A está tomando una hamburguesa).
+A sale de su región crítica (representa que el proceso A ha terminado de comer una hamburguesa).
+Proceso B:
+B se bloquea (representa que el proceso B no puede entrar a su región crítica mientras A está dentro).
+Tiempo:
+T1: A entra a su región crítica.
+T2: B intenta entrar a su región crítica pero se bloquea.
+T3: A sale de su región crítica.
+T4: B entra a su región crítica.
+En resumen, en este escenario, el proceso A toma una hamburguesa y luego sale de su región crítica, permitiendo que el proceso B entre y tome su hamburguesa.
+1.Número de hamburguesas por comensal:
+
+Dividimos el total de hamburguesas (8) entre el número de comensales (2):Hamburguesas por comensal=28​=4
+Hamburguesas por comensales= 8/2= 4
+2.Distribución:
+
+Cada comensal recibe 4 hamburguesas.
+
+Por lo tanto, la distribución sería la siguiente:
+
+Comensal 1: 4 hamburguesas
+Comensal 2: 4 hamburguesas
+
+c.#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NUMBER_OF_THREADS 2
+#define CANTIDAD_INICIAL_HAMBURGUESAS 8
+
+int cantidad_restante_hamburguesas = CANTIDAD_INICIAL_HAMBURGUESAS;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; // Mutex para exclusión mutua
+
+void *comer_hamburguesa(void *tid) {
+    while (1) {
+        // Entrada a la región crítica (exclusión mutua)
+        pthread_mutex_lock(&mutex);
+        if (cantidad_restante_hamburguesas > 0) {
+            printf("¡Hola! Soy el hilo (comensal) %d, me voy a comer una hamburguesa, ya que todavía quedan %d.\n", (int) tid, cantidad_restante_hamburguesas);
+            cantidad_restante_hamburguesas--;
+        } else {
+            printf("¡Terminaron las hamburguesas! :(\n");
+            pthread_mutex_unlock(&mutex); // Liberar el mutex antes de salir
+            pthread_exit(NULL);
+        }
+        // Salida de la región crítica
+        pthread_mutex_unlock(&mutex);
+        // Simulación de comer una hamburguesa
+        // ...
+    }
+}
+int main() {
+    pthread_t threads[NUMBER_OF_THREADS];
+    int i;
+    for (i = 0; i < NUMBER_OF_THREADS; i++) {
+        pthread_create(&threads[i], NULL, comer_hamburguesa, (void *) i);
+    }
+    for (i = 0; i < NUMBER_OF_THREADS; i++) {
+        pthread_join(threads[i], NULL);
+    }
+    pthread_mutex_destroy(&mutex); // Destruir el mutex
+    return 0;
+}
